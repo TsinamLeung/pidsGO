@@ -1,38 +1,21 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #201f1a;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  text-align: center;
+  font-size: calc(12px + 2vmin);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.frametest
+{
+  border-style: dotted;
+  border-color: red;
+  background-color: aqua;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+body {
+	font-family: Roboto,Chiron Sans HK Pro WS,-apple-system,PingFang HK,PingFang TC,蘋方-港,Noto Sans CJK HK,Source Han Sans HC,蘋方-台,Noto Sans CJK TC,Source Han Sans TC,思源黑體,Noto Sans,Source Han Sans,Microsoft JhengHei,微軟正黑體,sans-serif;
 }

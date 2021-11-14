@@ -1,0 +1,22 @@
+.ButtonBox{
+    padding-left: 1.5vw;
+    padding-right: 1.5vw;
+    padding-top: 0.5vh;
+    padding-bottom: 0.5vh;
+    text-align: center;
+    justify-content:center;
+    justify-self: center;
+    width: 100%;
+}
+
+.SimpleDivider {
+    color: white;
+    background-color: white;
+    min-width: 0.20vw;
+    min-height: 0.20vh;
+    margin-top: 0.5vh;
+}
+
+.InfoFramework{
+    border-radius: 0.4em;
+}
