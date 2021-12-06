@@ -1,6 +1,6 @@
 {
-  "name": "bus-things",
-  "version": "0.1.0",
+  "name": "PIDS-GO! 08",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
     "@mui/styled-engine-sc": "^5.0.3",

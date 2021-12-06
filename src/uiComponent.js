@@ -13,7 +13,8 @@ export const BlackButton = styled(Button)(({ theme }) => ({
     },
   }));
   
-const SideButtonWidth = "10em"
+
+
 export const PurpleButton = styled(Button)(({ theme }) => ({
     color: theme.palette.getContrastText(purple[500]),
     backgroundColor: purple[700],
@@ -22,50 +23,59 @@ export const PurpleButton = styled(Button)(({ theme }) => ({
     },
   }));
 
+const SideButtonFontSize = 33
+const sideButtonTheme = {
+  fontSize: SideButtonFontSize,
+  flexGrow: 1
+
+}
 export const ArrivalButton = styled(Button)(({ theme }) => ({
+    ...sideButtonTheme,
     color: theme.palette.getContrastText(purple[500]),
     backgroundColor: purple[700],
     '&:hover': {
       backgroundColor: purple[500],
     },
-    height: "100%",
-    width: SideButtonWidth
+
   }));
 
   export const DepartureButton = styled(Button)(({ theme }) => ({
+    ...sideButtonTheme,
     color: theme.palette.getContrastText(red[500]),
+    fontSize: SideButtonFontSize,
     backgroundColor: red[700],
     '&:hover': {
       backgroundColor: red[500],
     },
-    height: "100%",
-    width: SideButtonWidth
   }));
 
   export const StopButton = styled(Button)(({ theme }) => ({
+    ...sideButtonTheme,
     color: theme.palette.getContrastText(purple['A400']),
+    fontSize: SideButtonFontSize,
     backgroundColor: purple['A400'],
     '&:hover': {
       backgroundColor: purple['A200'],
     },
-    height: "100%",
-    width: SideButtonWidth
   }));
 
   export const LineButton = styled(Button)(({ theme }) => ({
+    ...sideButtonTheme,
     color: theme.palette.getContrastText(yellow['A700']),
+    fontSize: SideButtonFontSize,
     backgroundColor: yellow['A400'],
     '&:hover': {
       backgroundColor: yellow['A700'],
     },
-    height: "100%",
-    width: SideButtonWidth
   }));
 
 export function ButtonBox(props) {
     return (
-        <BlackButton onClick={props.onClick} 
-         className="ButtonBox">
+        <BlackButton 
+         onClick={props.onClick} 
+         className="ButtonBox"
+         style={{fontSize: "calc(12px + 2vmin)"}}
+         >
             {props.content}
         </BlackButton>
     )

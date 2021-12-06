@@ -1,14 +1,15 @@
 import './App.css';
-import { ButtonBox, SimpleDivider, IconInfoBox, InfoFramework, PurpleButton, ArrivalButton, DepartureButton, StopButton, LineButton } from './uiComponent';
+import { ButtonBox, SimpleDivider, IconInfoBox, InfoFramework, ArrivalButton, DepartureButton, StopButton, LineButton } from './uiComponent';
 import Grid from '@mui/material/Grid';
 import SvgIcon from '@mui/material/SvgIcon';
-import { Stack } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 import { Component } from 'react';
 import { BusPlayer } from './audioController';
 
 import UIInformation from './uiInfo';
 import { ConfigParser } from './ConfigParser.ts';
 import { LineInfoContainer, PlayDirection } from './LineInfoContainer.ts';
+import { padding } from '@mui/system';
 
 const HomeIcon = function (props) {
   return (
@@ -22,7 +23,8 @@ const BottomButton = function (props) {
     <Grid item xs={props.xs} flexGrow={2}>
       <ButtonBox 
        onClick={props.onClick} 
-       content={props.content} />
+       content={props.content}
+       />
     </Grid>
   )
 }
@@ -53,7 +55,7 @@ class Clock extends Component {
     return (
       <Grid>
         {/* https://stackoverflow.com/questions/19346405/jquery-how-to-get-hhmmss-from-date-object */}
-        <p>{this.state.date.toTimeString().split(' ')[0]}</p>
+        <p style={{margin: 0}}>{this.state.date.toTimeString().split(' ')[0]}</p>
       </Grid>
     )
   }
@@ -75,6 +77,9 @@ export class MainPage extends Component {
     this.onArrivalButton = this.onArrivalButton.bind(this)
     this.onDepartureButton = this.onDepartureButton.bind(this)
     this.onCustomButton = this.onCustomButton.bind(this)
+    this.stopAudioPlay = this.stopAudioPlay.bind(this)
+    this.UIInfo.lineID = this.props.lineID
+    this.UIInfo.driver_ID = this.props.driverID
   }
 
   componentDidMount() {
@@ -143,6 +148,18 @@ export class MainPage extends Component {
     })
   }
 
+  showDirection() {
+    let direc = this.UIInfo.lineID.match(/(\d{2})$/g)
+    if(direc === null)
+    {
+      return ""
+    }
+    return this.UIInfo.direc_info[direc] ?? "区间短线"
+  }
+
+  stopAudioPlay() {
+    this.setState({shouldPlay: false})
+  }
   render()
   {
     return (
@@ -155,41 +172,56 @@ export class MainPage extends Component {
           direction="column"
           justifyContent="start"
           alignItems="stretch"
-          spacing={1}
           width='98vw'
-          height='100vh'
+          flexGrow={2}
+          flexBasis="100vh"
+          spacing={1}
           >
           <Grid container
             spacing={0.5}
             justifyContent='start'
             alignItems='center'
             margin={0}
+            padding={0}
             >
             <HomeIcon />
             <Clock date={new Date()} />
-
+            <Stack flexGrow={1} />
+            <span>Designed by DinGaau </span>
+            <span style={{
+              color:"white",
+              paddingLeft:"0.5em",
+              }}>Zenam</span>
           </Grid>
-          <SimpleDivider horizontal />
+          <Divider variant="middle" flexItem sx={{
+            background: "white",
+            color: "white",
+            margin: 0,
+            padding: 0,
+            }} />
+          {/* <SimpleDivider horizontal /> */}
           {/* 頂部 Top */}
           {/* 中間開始 Middle Start */}
           <Stack
             direction="row"
             spacing={3}
             justifyContent="space-between"
+
             >
             {/* 左 Left */} 
             <Stack
               direction="column"
               justifyContent="flex-start"
               alignItems="stretch"
-              spacing={0.5}
-              width="90%"
-              padding='1em'
+              spacing={0}
+              // width="90%"
+              flexGrow={1}
             >
               {/* line1 */}
               <Stack 
               direction='row'
               spacing={1}
+              flexGrow={0.1}
               justifyContent='space-between' 
               >
                 {/* left */}
@@ -205,30 +237,43 @@ export class MainPage extends Component {
                 </Stack>
                 {/* right */}
                 <InfoFramework
-                  sx={{alignItems:'flex-end'}}
-                  height="100%"
-                  width="20%"
+                  sx={{
+                    alignItems:'flex-end',
+                  }}
+                  flexGrow={1}
                   backgroundColor='rgb(9, 100, 100)'
                   >
                   <p>{this.UIInfo.lineID}</p>
-                  <p>{this.UIInfo.breif_direc}</p>
+                  <p>{this.showDirection()}</p>
                 </InfoFramework>
               </Stack>
               {/* line2 */}
+              <Stack 
+                flexGrow={1}
+              />
               <InfoFramework 
                 height='8em'
-                width="98%" 
+                flexGrow={1}
                 backgroundColor="blue"
                 >
-                  <pre style={{textAlign:"start"}}>
+                  <pre style={{
+                    textAlign:"start",
+                    marginLeft: "1rem",
+                    mairginright: "1.5rem",
+                    color: "yellow",
+                    fontSize: "calc(22px + 2vmin)"
+                    }}>
                     {this.UIInfo.infoBox_text}
                   </pre>
               </InfoFramework>
               {/* line3 */}
+              <Stack 
+                flexGrow={1}
+              />
               <Grid
                 direction="row"
                 container
-                justifyContent="flex-start"
+                justifyContent="flex-end"
                 alignItems="start"
                 spacing={0}
                 column={2}
@@ -246,15 +291,16 @@ export class MainPage extends Component {
               direction="column"
               justifyContent="space-between"
               alignItems="flex-end"
+              flexGrow={0}
               spacing={1}
               >
               <ArrivalButton onClick={this.onArrivalButton}>
-                入 站
+                出 站
               </ArrivalButton>
               <DepartureButton onClick={this.onDepartureButton}>
-                出 站
+                入 站
               </DepartureButton>
-              <StopButton>
+              <StopButton onClick={this.stopAudioPlay}>
                 停 止
               </StopButton>
               <LineButton>
@@ -268,7 +314,7 @@ export class MainPage extends Component {
           <Grid container
             spacing={0}
             justifyContent='center'
-            justifySelf='end'
+            justifySelf='start'
             columns={7}
             >
             <BottomButton content={this.UIInfo.btn_text[0]} onClick={this.onCustomButton.bind(this,this.UIInfo.btn_audio[0])} />

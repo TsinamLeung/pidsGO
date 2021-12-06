@@ -2,6 +2,11 @@ export default class UIInformation {
     btn_text = ["转弯","让座","后移","警示","禁烟","卫生"]
     btn_audio = ["","","","","",""]
 
+    direc_info = {
+        "99" : "下行",
+        "00" : "上行"
+    }
+
     speed = "0.0"
     speed_limit = 50
 

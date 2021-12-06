@@ -37,9 +37,9 @@ export class ConfigParser {
     async parseButtonConfig(lineid: String): Promise<ButtonInfo[]> {
         let ret : Array<ButtonInfo> = []
 
-        let response = await fetch(this.lineCongfigPath + lineid + ButtonSettingSuffix + ".csv")
+        let response = await fetch(encodeURI(this.lineCongfigPath + lineid + ButtonSettingSuffix + ".csv"))
         if (response.status !== 200) {
-            response = await fetch(this.lineCongfigPath + lineid + "default_btn" + ".csv")
+            response = await fetch(encodeURI(this.lineCongfigPath + lineid + "default_btn.csv"))
             if(response.status !== 200) 
             {
                 console.error("[parseButtonConfig]fetch error")
@@ -70,7 +70,7 @@ export class ConfigParser {
         return ret
     }
     async parseLineConfig(lineid: String): Promise<LineInfo[]> {
-        let response = await fetch(this.lineCongfigPath + lineid + ".csv")
+        let response = await fetch(encodeURI(this.lineCongfigPath + lineid + ".csv"))
         if (response.status !== 200) {
             console.error("cannot load line")
             return []
