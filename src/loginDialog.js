@@ -13,24 +13,44 @@ export class LoginDialog extends React.Component {
     this.state = {
       show: true,
       driverID: "",
-      lineID: ""
+      lineID: "",
+      pageRoute: ""
     }
-    this.close = this.close.bind(this)
+    this.onManualClose = this.onManualClose.bind(this)
+    this.onAutoModeClose = this.onAutoModeClose.bind(this)
+    this.onGoToAutoModeRecorder = this.onGoToAutoModeRecorder.bind(this)
   }
-
-  close() {
+  closeWithArguments(...args) {
     this.setState({
       show: false
     })
     if(this.closeCallback !== undefined)
     {
-      this.closeCallback({
-        driverID: this.state.driverID,
-        lineID: this.state.lineID
-      })
+      this.closeCallback(...args)
     }
   }
-
+  onManualClose() {
+    this.closeWithArguments({
+      driverID: this.state.driverID,
+      lineID: this.state.lineID
+    })
+  }
+  
+  onAutoModeClose() {
+    this.closeWithArguments({
+      driverID: this.state.driverID,
+      lineID: this.state.lineID,
+      configCode: this.state.configCode,
+      pageRoute: "AUTOMODE"
+    })
+  }
+  onGoToAutoModeRecorder() {
+    this.closeWithArguments({
+      driverID: this.state.driverID,
+      lineID: this.state.lineID,
+      pageRoute: "AUTOROUTERECORDER"
+    })
+  }
   render()
   {
 
@@ -45,10 +65,17 @@ export class LoginDialog extends React.Component {
             <TextField label="司机编号" variant="outlined" value={this.state.driverID} onChange={(event) => {this.setState({driverID: event.target.value})}} />
             <TextField label="线路编号" variant="outlined" value={this.state.lineID}  onChange={(event) => {this.setState({lineID: event.target.value})}} />
           </Stack>
-          <Button variant="outlined" href="#" onClick={this.close}>
-            发送
+          <Button variant="outlined" href="#" onClick={this.onManualClose}>
+            手动模式
+          </Button>
+          <Button variant="outlined" href="#" onClick={this.onAutoModeClose}>
+            自动模式
           </Button>
         </ButtonGroup>
+        <TextField label="特殊代码" variant="outlined" value={this.state.configCode}  onChange={(event) => {this.setState({configCode: event.target.value})}} />
+        <Button variant="outlined" href="#" onClick={this.onGoToAutoModeRecorder}>
+            前往配置工具
+        </Button>
       </Dialog>
     );  
   }

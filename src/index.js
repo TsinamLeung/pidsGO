@@ -3,20 +3,21 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import * as Main from './mainPage.js';
+import * as Auto from './AutoPage.js'
+import * as Recorder from './AutoModeRecorder.js'
 import { LoginDialog, validPath } from './loginDialog'
 import { ConfigParser } from './ConfigParser.ts'
-async function onLoginDialogClose(info)
-{
+async function onLoginDialogClose(info) {
   let driverID = info.driverID
   let lineID = info.lineID
-  
+  let pageRoute = info.pageRoute === undefined ? "" : info.pageRoute
   let userValidRes = await fetch(encodeURI(validPath + driverID + ".txt"))
   if (userValidRes.status !== 200) {
     RenderErrorPage()
     return
   }
   let responseText = await userValidRes.text()
-  if(responseText.length > 0) {
+  if (responseText.length > 0) {
     RenderErrorPage()
     return
   }
@@ -26,8 +27,13 @@ async function onLoginDialogClose(info)
     RenderErrorPage()
     return
   }
-
-  RenderMain(driverID, lineID)
+  if (pageRoute === "AUTOMODE") {
+    RenderAutoMode(driverID, lineID, info.configCode)
+  } else if (pageRoute === "AUTOROUTERECORDER") {
+    RenderAutoModelRecorder(driverID, lineID)
+  } else {
+    RenderMain(driverID, lineID)
+  }
 }
 
 function RenderLoginDialog()
@@ -58,6 +64,24 @@ function RenderErrorPage()
     </h1>
     ,
     document.getElementById('root')
+  )
+}
+
+function RenderAutoMode(driverID, lineID, config) {
+  ReactDOM.render(
+    <React.StrictMode>
+      <Auto.AutoModelPage driverID={driverID} lineID={lineID} config={config} />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+}
+
+function RenderAutoModelRecorder(driverID, lineID)  {
+  ReactDOM.render(
+    <React.StrictMode>
+    <Recorder.AutoModelRecorderPage driverID={driverID} lineID={lineID}/>
+  </React.StrictMode>,
+  document.getElementById('root')
   )
 }
 RenderLoginDialog()
