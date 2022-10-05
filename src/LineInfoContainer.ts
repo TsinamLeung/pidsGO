@@ -10,15 +10,13 @@ export class LineInfoContainer {
     currentIndex = 0
     _container: Array<LineInfo> = []
 
-    updateContainer(lineInfos: Array<LineInfo>)
-    {
+    updateContainer(lineInfos: Array<LineInfo>) {
         this._container = lineInfos
     }
 
     switchSheet(direc: PlayDirection) {
         let index = this.currentIndex
-        switch(direc) 
-        {
+        switch (direc) {
             case PlayDirection.Forward:
                 index += 1
                 break;
@@ -28,10 +26,9 @@ export class LineInfoContainer {
             case PlayDirection.Replay:
                 break;
         }
-        if(index < 0)
-        {
+        if (index < 0) {
             index = 0
-        }else {
+        } else {
             index = index % this._container.length
         }
         this.currentIndex = index
@@ -45,7 +42,7 @@ export class LineInfoContainer {
     getFare() {
         return this._container[this.currentIndex].fare
     }
-    
+
     getSpeedLimit() {
         return this._container[this.currentIndex].speed
     }
@@ -56,5 +53,9 @@ export class LineInfoContainer {
 
     getArrivalPlaylist() {
         return this._container[this.currentIndex].arrivalaudio
+    }
+
+    getCurrentIndex() {
+        return this.currentIndex
     }
 }

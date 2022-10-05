@@ -303,7 +303,7 @@ export class MainPage extends Component {
               <StopButton onClick={this.stopAudioPlay}>
                 停 止
               </StopButton>
-              <LineButton>
+              <LineButton onClick={() => {window.location.reload()}}>
                 路 线
               </LineButton>
             </Stack>
