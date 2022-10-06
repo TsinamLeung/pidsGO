@@ -22,7 +22,7 @@ export class AutoModelRecorderPage extends Component {
     super(props)
     this.lineID = props.lineID
     this.driverID = props.driverID
-    let isSupportGeolocaiton = "geolocation" in navigator
+    const isSupportGeolocaiton = "geolocation" in navigator
     this.state = {
       supportGeolocation: isSupportGeolocaiton,
       showDialog: isSupportGeolocaiton,

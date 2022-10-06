@@ -5,7 +5,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import { Divider, Stack } from '@mui/material';
 import { Component } from 'react';
 import { BusPlayer } from './audioController';
-
+import { AutoConfig, AutoConfigContainer } from "./AutoConfig";
 import UIInformation from './uiInfo';
 import { ConfigParser } from './ConfigParser.ts';
 import { LineInfoContainer, PlayDirection } from './LineInfoContainer.ts';
@@ -63,17 +63,26 @@ class Clock extends Component {
 
 
 export class MainPage extends Component {
-  
-  
   constructor(props) {
     super(props)
     this.state = {
       shouldPlay: false,
-      audioSrc: []
+      audioSrc: [],
+      isAutoMode: props.enableAutoMode,
+      fetchPositionTimeout: 3000
     }
-    this.UIInfo = new UIInformation();
+    this.isSupportGeolocaiton = "geolocation" in navigator
+    if(this.state.isAutoMode) {
+      const autoModeConfigCode = props.configCode
+      this.autoConfigContainer = JSON.parse(autoModeConfigCode)
+      Object.assign(AutoConfigContainer, this.autoConfigContainer)
+      this.fetchCurrentPosition = this.fetchCurrentPosition.bind(this)
+    }
+  
+    this.UIInfo = new UIInformation()
     this.configParser = new ConfigParser()
     this.lineInfoContainer = new LineInfoContainer()
+
     this.onArrivalButton = this.onArrivalButton.bind(this)
     this.onDepartureButton = this.onDepartureButton.bind(this)
     this.onCustomButton = this.onCustomButton.bind(this)
@@ -84,7 +93,12 @@ export class MainPage extends Component {
 
   componentDidMount() {
     this.UIInfo.infoBox_text = "加 載 中 。\nLOADING .."
-    this.setState({}) 
+    this.setState({})
+    if(this.state.isAutoMode && !this.state.isSupportGeolocaiton) {
+      this.UIInfo.infoBox_text = "設 備 不 支 持 自 動 模 式。\nGeolocation are not support on your devices."
+      this.setState({})
+    }
+    
     this.configParser.parseLineConfig(this.UIInfo.lineID).then(ret => {
       this.lineInfoContainer.updateContainer(ret)
       this.UIInfo.infoBox_text = "成 功 加 載，\nLoad Successed\n" + this.UIInfo.lineID
@@ -110,6 +124,22 @@ export class MainPage extends Component {
         }
         this.setState({}) 
     })
+  }
+
+  fetchCurrentPosition() {
+    setTimeout(() => {
+      navigator.geolocation.getCurrentPosition(pos => {
+        console.log(pos.coords)
+      }, err => {
+        console.error(err)
+      }, {
+        
+      })
+    }, this.state.fetchPositionTimeout)
+  }
+
+  onGetlocationUpdate(pos) {
+
   }
 
   updateUIInfo()
@@ -294,10 +324,10 @@ export class MainPage extends Component {
               flexGrow={0}
               spacing={1}
               >
-              <ArrivalButton onClick={this.onArrivalButton}>
+              <ArrivalButton disabled={this.state.isAutoMode} onClick={this.onArrivalButton}>
                 出 站
               </ArrivalButton>
-              <DepartureButton onClick={this.onDepartureButton}>
+              <DepartureButton disabled={this.state.isAutoMode} onClick={this.onDepartureButton}>
                 入 站
               </DepartureButton>
               <StopButton onClick={this.stopAudioPlay}>

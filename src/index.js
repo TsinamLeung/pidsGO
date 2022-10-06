@@ -3,36 +3,45 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import * as Main from './mainPage.js';
-import * as Auto from './AutoPage.js'
 import * as Recorder from './AutoModeRecorder.js'
 import { LoginDialog, validPath } from './loginDialog'
 import { ConfigParser } from './ConfigParser.ts'
+
 async function onLoginDialogClose(info) {
   let driverID = info.driverID
   let lineID = info.lineID
   let pageRoute = info.pageRoute === undefined ? "" : info.pageRoute
   let userValidRes = await fetch(encodeURI(validPath + driverID + ".txt"))
+  const regularErrMsg = 'Cannot Found Corresponse Driver or Line, 无法找到相应的司机或线路'
+  const autoCodeError = 'incorrect Special Code, 特殊代码不正确'
   if (userValidRes.status !== 200) {
     RenderErrorPage()
     return
   }
   let responseText = await userValidRes.text()
   if (responseText.length > 0) {
-    RenderErrorPage()
+    RenderErrorPage(regularErrMsg)
     return
   }
   const cp = new ConfigParser()
   let lineValidRes = await fetch(encodeURI(cp.lineCongfigPath + lineID + ".csv"))
   if (lineValidRes.status !== 200) {
-    RenderErrorPage()
+    RenderErrorPage(regularErrMsg)
     return
   }
   if (pageRoute === "AUTOMODE") {
-    RenderAutoMode(driverID, lineID, info.configCode)
+    // {"radius":20,"positionContainer":[{"latitude":23.262073,"longtitude":113.326443},null,null,null,null,null,null,{"latitude":23.262073,"longtitude":113.326443},null,null,null,null,null,null,null,null,{"latitude":23.2620728,"longtitude":113.3264427},{"latitude":23.2620728,"longtitude":113.3264427}]}
+    if(info.configCode === undefined)
+    {
+      RenderErrorPage(autoCodeError)
+      return
+    }
+    JSON.parse(info.configCode)
+    RenderMain(driverID, lineID, info.configCode, true)
   } else if (pageRoute === "AUTOROUTERECORDER") {
     RenderAutoModelRecorder(driverID, lineID)
   } else {
-    RenderMain(driverID, lineID)
+    RenderMain(driverID, lineID, info.configCode, false)
   }
 }
 
@@ -46,34 +55,25 @@ function RenderLoginDialog()
   )
 }
 
-function RenderMain(driverID, lineID)
+function RenderMain(driverID, lineID, configCode, enableAutoMode)
 {
   ReactDOM.render(
     <React.StrictMode>
-      <Main.MainPage driverID={driverID} lineID={lineID} />
+      <Main.MainPage driverID={driverID} lineID={lineID} configCode={configCode} enableAutoMode={enableAutoMode} />
     </React.StrictMode>,
     document.getElementById('root')
   );
 }
 
-function RenderErrorPage()
+function RenderErrorPage(error_msg)
 {
   ReactDOM.render(
     <h1>
-      Cannot Found Corresponse Driver or Line, 无法找到相应的司机或线路
+      {error_msg}
     </h1>
     ,
     document.getElementById('root')
   )
-}
-
-function RenderAutoMode(driverID, lineID, config) {
-  ReactDOM.render(
-    <React.StrictMode>
-      <Auto.AutoModelPage driverID={driverID} lineID={lineID} config={config} />
-    </React.StrictMode>,
-    document.getElementById('root')
-  );
 }
 
 function RenderAutoModelRecorder(driverID, lineID)  {
