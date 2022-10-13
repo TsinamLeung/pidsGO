@@ -14,6 +14,15 @@ export class LineInfoContainer {
         this._container = lineInfos
     }
 
+    setIndex(index: number) {
+        if (index < 0) {
+            index = 0
+        } else {
+            index = index % this._container.length
+        }
+        this.currentIndex = index
+    }
+    
     switchSheet(direc: PlayDirection) {
         let index = this.currentIndex
         switch (direc) {
@@ -26,12 +35,7 @@ export class LineInfoContainer {
             case PlayDirection.Replay:
                 break;
         }
-        if (index < 0) {
-            index = 0
-        } else {
-            index = index % this._container.length
-        }
-        this.currentIndex = index
+        this.setIndex(index)
         return this._container[index]
     }
 

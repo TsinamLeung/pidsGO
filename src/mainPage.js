@@ -3,7 +3,7 @@ import { ButtonBox, SimpleDivider, IconInfoBox, InfoFramework, ArrivalButton, De
 import Grid from '@mui/material/Grid';
 import SvgIcon from '@mui/material/SvgIcon';
 import { Divider, Stack } from '@mui/material';
-import { Component } from 'react';
+import { Component, createRef } from 'react';
 import { BusPlayer } from './audioController';
 import { AutoConfig, AutoConfigContainer } from "./AutoConfig";
 import UIInformation from './uiInfo';
@@ -68,20 +68,27 @@ export class MainPage extends Component {
     this.state = {
       shouldPlay: false,
       audioSrc: [],
+      audioPlayNum: 0,
       isAutoMode: props.enableAutoMode,
       fetchPositionTimeout: 3000
     }
     this.isSupportGeolocaiton = "geolocation" in navigator
+    this.busPlayRef = createRef()
     if(this.state.isAutoMode) {
       const autoModeConfigCode = props.configCode
       this.autoConfigContainer = JSON.parse(autoModeConfigCode)
       Object.assign(AutoConfigContainer, this.autoConfigContainer)
-      this.fetchCurrentPosition = this.fetchCurrentPosition.bind(this)
+      this.onGetlocationUpdate = this.onGetlocationUpdate.bind(this)
+      this.lastTimeStamp = 0
+      this.lastCoords = undefined
+      this.lastStopIndex = -1
+      this.inStopPlayNum = 0
     }
   
     this.UIInfo = new UIInformation()
     this.configParser = new ConfigParser()
     this.lineInfoContainer = new LineInfoContainer()
+    this.isFetchingPosition = false
 
     this.onArrivalButton = this.onArrivalButton.bind(this)
     this.onDepartureButton = this.onDepartureButton.bind(this)
@@ -98,7 +105,6 @@ export class MainPage extends Component {
       this.UIInfo.infoBox_text = "設 備 不 支 持 自 動 模 式。\nGeolocation are not support on your devices."
       this.setState({})
     }
-    
     this.configParser.parseLineConfig(this.UIInfo.lineID).then(ret => {
       this.lineInfoContainer.updateContainer(ret)
       this.UIInfo.infoBox_text = "成 功 加 載，\nLoad Successed\n" + this.UIInfo.lineID
@@ -108,63 +114,116 @@ export class MainPage extends Component {
       console.error(reason)
       this.UIInfo.infoBox_text = "失 敗 加 載，\nLoad Failed\n" + this.UIInfo.lineID
     })
-
+    
     this.configParser.parseButtonConfig(this.UIInfo.lineID).then(ret => {
-        for(let i in ret)
+      for(let i in ret)
+      {
+        let eachBtn = ret[i]
+        let matches = eachBtn.buttonID.match(/btn(\d+)/)
+        if(matches === null) 
         {
-          let eachBtn = ret[i]
-          let matches = eachBtn.buttonID.match(/btn(\d+)/)
-          if(matches === null) 
-          {
-            continue
-          }
-          let btnID = matches[1]
-          this.UIInfo.btn_text[btnID - 1] = eachBtn.text
-          this.UIInfo.btn_audio[btnID - 1] = eachBtn.audio
+          continue
         }
-        this.setState({}) 
+        let btnID = matches[1]
+        this.UIInfo.btn_text[btnID - 1] = eachBtn.text
+        this.UIInfo.btn_audio[btnID - 1] = eachBtn.audio
+      }
+      this.setState({}) 
     })
+    if(this.state.isAutoMode)
+    {
+      this.watchPositionID = navigator.geolocation.watchPosition(this.onGetlocationUpdate, null, {
+        timeout: 3000
+      })
+    }
   }
 
-  fetchCurrentPosition() {
-    setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(pos => {
-        console.log(pos.coords)
-      }, err => {
-        console.error(err)
-      }, {
-        
-      })
-    }, this.state.fetchPositionTimeout)
-  }
 
   onGetlocationUpdate(pos) {
+    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      return d;
+    }
+    
+    function deg2rad(deg) {
+      return deg * (Math.PI/180)
+    }
 
+    function inCircle(targetLat,targetLng,targetRadius,curLat,curLng,curRadius) {
+      let distance = 1000*getDistanceFromLatLonInKm(targetLat,targetLng,curLat,curLng)
+      let dTotal = targetRadius + curRadius
+      return distance < dTotal
+    }
+    if (pos.timestamp > this.lastTimeStamp) {
+      this.lastTimeStamp = pos.timestamp
+    } else {
+      return
+    }
+    if(this.lastCoords === undefined)
+    {
+      this.lastCoords = pos.coords
+    }
+    let coords = pos.coords
+    let speed = coords.speed * 3.6
+    let inCircleStops = this.autoConfigContainer.positionContainer.map(v => 
+        inCircle(v.latitude, v.longtitude, this.autoConfigContainer.radius, 
+                 coords.latitude, coords.longitude, coords.accuracy))
+    const curStopIndex = inCircleStops.findIndex(v => v === true)
+    if(this.busPlayRef.current === null)
+    {
+      return
+    }
+    const isStillPlaying = this.busPlayRef.current.isPlaying
+    console.log(isStillPlaying)
+    if(curStopIndex !== -1 && curStopIndex !== this.lastStopIndex) {
+      this.lastStopIndex = curStopIndex
+      this.lineInfoContainer.setIndex(curStopIndex)
+      this.playAudio(this.lineInfoContainer.getArrivalPlaylist())
+      this.inStopPlayNum = this.state.audioPlayNum
+    } else if(curStopIndex === -1 && this.lastStopIndex !== curStopIndex && (this.inStopPlayNum !== this.state.audioPlayNum  || !isStillPlaying)) {
+      // resume that stopIndex never change
+      this.playAudio(this.lineInfoContainer.getDeparturePlaylist())
+      this.lastStopIndex = -1
+    }
+
+    this.UIInfo.speed = speed.toFixed(1)
+    this.updateUIInfo()
+    this.setState({})
+    this.lastCoords = coords
   }
 
-  updateUIInfo()
-  {
+  updateUIInfo() {
     this.UIInfo.infoBox_text = this.lineInfoContainer.getInfo()
     this.UIInfo.cur_price = this.lineInfoContainer.getFare()
     this.UIInfo.speed_limit = this.lineInfoContainer.getSpeedLimit()
   }
 
-  onArrivalButton() {
-    const playList = this.lineInfoContainer.getArrivalPlaylist()
+  playAudio(audioSrc) {
     this.setState({
-      audioSrc: playList,
+      audioPlayNum: this.state.audioPlayNum + 1,
+      audioSrc: audioSrc,
       shouldPlay: true
     })
+  }
+  onArrivalButton() {
+    const playList = this.lineInfoContainer.getArrivalPlaylist()
+    this.playAudio(playList)
   }
 
   onDepartureButton() {
     const playList = this.lineInfoContainer.getDeparturePlaylist()
     this.lineInfoContainer.switchSheet(PlayDirection.Forward)
     this.updateUIInfo()
-    this.setState({
-      audioSrc: playList,
-      shouldPlay: true
-    })
+    this.playAudio(playList)
   }
   
   onCustomButton(src) {
@@ -172,10 +231,7 @@ export class MainPage extends Component {
     {
       return
     }
-    this.setState({
-      audioSrc: src,
-      shouldPlay: true
-    })
+    this.playAudio(src)
   }
 
   showDirection() {
@@ -188,8 +244,12 @@ export class MainPage extends Component {
   }
 
   stopAudioPlay() {
-    this.setState({shouldPlay: false})
+    this.setState({
+      shouldPlay: false,
+      audioPlayNum: this.state.audioPlayNum + 1
+    })
   }
+
   render()
   {
     return (
@@ -197,6 +257,8 @@ export class MainPage extends Component {
         <BusPlayer 
         audioSrc={this.state.audioSrc}
         shouldPlay={this.state.shouldPlay}
+        playNum={this.state.audioPlayNum}
+        ref={this.busPlayRef}
         />
         <Stack
           direction="column"

@@ -29,6 +29,7 @@ export class AutoModelRecorderPage extends Component {
       shouldPlay: false,
       currentPlayAudio: "",
       dialogHint: "",
+      playNum: 0,
     }
 
     this.configParser = new ConfigParser()
@@ -43,6 +44,7 @@ export class AutoModelRecorderPage extends Component {
     this.onNextSheet = this.onNextSheet.bind(this)
     this.configuredList = this.configuredList.bind(this)
     this.onGenerateButton = this.onGenerateButton.bind(this)
+    this.currentPosition = undefined
   }
 
   componentDidMount() {
@@ -50,16 +52,25 @@ export class AutoModelRecorderPage extends Component {
         this.lineInfoContainer.updateContainer(lineInfoArray)
         this.updateDialogHint(this.lineInfoContainer.getInfo())
       })
+      navigator.geolocation.watchPosition(pos => {
+        this.currentPosition = pos
+      }, null, {
+        timeout: 3000,
+        enableHighAccuracy: true
+      })
   }
-  
+    
   onSetPosition() {
-   navigator.geolocation.getCurrentPosition((pos)=>{
+    if(this.currentPosition === undefined)
+    {
+      return
+    }
+    let pos = this.currentPosition
     const lat = pos.coords.latitude
     const long = pos.coords.longitude
     const curIndex = this.lineInfoContainer.getCurrentIndex()
     this.positionContainer.updatePosition(curIndex,new AutoConfig(lat,long))
     this.setState({})
-  })
   }
 
   updateDialogHint(content) {
@@ -83,7 +94,8 @@ export class AutoModelRecorderPage extends Component {
     const playList = this.lineInfoContainer.getArrivalPlaylist()
     this.setState({
       currentPlayAudio: playList,
-      shouldPlay: true
+      shouldPlay: true,
+      playNum: this.state.playNum + 1
     })
   }
 
@@ -91,7 +103,8 @@ export class AutoModelRecorderPage extends Component {
     const playList = this.lineInfoContainer.getDeparturePlaylist()
     this.setState({
       currentPlayAudio: playList,
-      shouldPlay: true
+      shouldPlay: true,
+      playNum: this.state.playNum + 1,
     })
   }
 
@@ -125,6 +138,7 @@ export class AutoModelRecorderPage extends Component {
         <BusPlayer 
         audioSrc={this.state.currentPlayAudio}
         shouldPlay={this.state.shouldPlay}
+        playNum={this.state.playNum}
         />
         <Dialog
           fullScreen

@@ -12,9 +12,10 @@ export class LoginDialog extends React.Component {
     this.closeCallback = this.props.closeCallback
     this.state = {
       show: true,
-      driverID: "",
-      lineID: "",
-      pageRoute: ""
+      driverID: "123",
+      lineID: "00010[00]",
+      pageRoute: "",
+      configCode: '{"radius":20,"positionContainer":[{"latitude":0.1,"longtitude":0.1},{"latitude":1.1,"longtitude":0.1},{"latitude":1.1,"longtitude":1.1}]}'
     }
     this.onManualClose = this.onManualClose.bind(this)
     this.onAutoModeClose = this.onAutoModeClose.bind(this)
