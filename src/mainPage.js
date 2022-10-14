@@ -2,7 +2,7 @@ import './App.css';
 import { ButtonBox, SimpleDivider, IconInfoBox, InfoFramework, ArrivalButton, DepartureButton, StopButton, LineButton } from './uiComponent';
 import Grid from '@mui/material/Grid';
 import SvgIcon from '@mui/material/SvgIcon';
-import { Divider, Stack } from '@mui/material';
+import { Divider, Stack} from '@mui/material';
 import { Component, createRef } from 'react';
 import { BusPlayer } from './audioController';
 import { AutoConfig, AutoConfigContainer } from "./AutoConfig";
@@ -10,11 +10,11 @@ import UIInformation from './uiInfo';
 import { ConfigParser } from './ConfigParser.ts';
 import { LineInfoContainer, PlayDirection } from './LineInfoContainer.ts';
 import { padding } from '@mui/system';
-
+import {SatelliteAlt, SignalCellularAlt, Bluetooth, MoveToInbox} from '@mui/icons-material'
 const HomeIcon = function (props) {
   return (
     <SvgIcon {...props}>
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+
     </SvgIcon>
   );
 }
@@ -276,14 +276,14 @@ export class MainPage extends Component {
             margin={0}
             padding={0}
             >
-            <HomeIcon />
+            <SatelliteAlt />
+            <Stack flexGrow={0.02} />
+            <SignalCellularAlt />
             <Clock date={new Date()} />
+            <Bluetooth />
+            <MoveToInbox />
             <Stack flexGrow={1} />
-            <span>Designed by DinGaau </span>
-            <span style={{
-              color:"white",
-              paddingLeft:"0.5em",
-              }}>Zenam</span>
+            <span style={{fontSize:'0.5em'}}>Designed by DinGaau Zenam</span>
           </Grid>
           <Divider variant="middle" flexItem sx={{
             background: "white",
@@ -347,6 +347,7 @@ export class MainPage extends Component {
                 height='8em'
                 flexGrow={1}
                 backgroundColor="blue"
+                sx={{mr:'1em'}}
                 >
                   <pre style={{
                     textAlign:"start",

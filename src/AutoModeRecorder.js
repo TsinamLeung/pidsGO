@@ -82,12 +82,14 @@ export class AutoModelRecorderPage extends Component {
   
   onNextSheet() {
     this.lineInfoContainer.switchSheet(PlayDirection.Forward)
-    this.updateDialogHint(this.lineInfoContainer.getInfo())
+    const index = this.lineInfoContainer.getCurrentIndex()
+    this.updateDialogHint(index + '. ' + this.lineInfoContainer.getInfo())
   }
 
   onPreviousSheet() {
     this.lineInfoContainer.switchSheet(PlayDirection.Backward)
-    this.updateDialogHint(this.lineInfoContainer.getInfo())
+    const index = this.lineInfoContainer.getCurrentIndex()
+    this.updateDialogHint(index + '. ' + this.lineInfoContainer.getInfo())
   }
   
   onArrivalButton() {
@@ -116,7 +118,7 @@ export class AutoModelRecorderPage extends Component {
             key={i}
             disableGutters
           >
-            <ListItemText primary={v.info + this.positionContainer.getPositionInfo(i)} />
+            <ListItemText primary={i + '. ' + v.info + this.positionContainer.getPositionInfo(i)} />
           </ListItem>
         ))}
       </List>
@@ -124,7 +126,7 @@ export class AutoModelRecorderPage extends Component {
   }
 
   onGenerateButton() {
-    this.updateDialogHint(JSON.stringify(this.positionContainer))
+    this.updateDialogHint(`自動模式配置已生成 此數據由閣下保存 服務器不會儲存${JSON.stringify(this.positionContainer)}`)
   }
 
   render() {

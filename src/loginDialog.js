@@ -12,10 +12,10 @@ export class LoginDialog extends React.Component {
     this.closeCallback = this.props.closeCallback
     this.state = {
       show: true,
-      driverID: "123",
-      lineID: "00010[00]",
+      driverID: "",
+      lineID: "",
       pageRoute: "",
-      configCode: '{"radius":20,"positionContainer":[{"latitude":0.1,"longtitude":0.1},{"latitude":1.1,"longtitude":0.1},{"latitude":1.1,"longtitude":1.1}]}'
+      configCode: ''
     }
     this.onManualClose = this.onManualClose.bind(this)
     this.onAutoModeClose = this.onAutoModeClose.bind(this)
@@ -73,9 +73,10 @@ export class LoginDialog extends React.Component {
             自动模式
           </Button>
         </ButtonGroup>
-        <TextField label="特殊代码" variant="outlined" value={this.state.configCode}  onChange={(event) => {this.setState({configCode: event.target.value})}} />
+        <Stack spacing={1} flexGrow={0.01}></Stack>
+        <TextField label="配置代码" variant="outlined" value={this.state.configCode}  onChange={(event) => {this.setState({configCode: event.target.value})}} />
         <Button variant="outlined" href="#" onClick={this.onGoToAutoModeRecorder}>
-            前往配置工具
+            采集工具
         </Button>
       </Dialog>
     );  
