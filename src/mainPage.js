@@ -69,6 +69,48 @@ class Clock extends Component {
 
 
 export class MainPage extends Component {
+  handleKey = e => {
+
+    switch (e.code) {
+      case "Numpad1":
+      case "Digit1":
+        this.onCustomButton(this.UIInfo.btn_audio[0])
+        break;
+      case "Numpad2":
+      case "Digit2":
+        this.onCustomButton(this.UIInfo.btn_audio[1])
+        break;
+      case "Numpad3":
+      case "Digit3":
+        this.onCustomButton(this.UIInfo.btn_audio[2])
+        break;
+      case "Numpad4":
+      case "Digit4":
+        this.onCustomButton(this.UIInfo.btn_audio[3])
+        break;
+      case "Numpad5":
+      case "Digit5":
+        this.onCustomButton(this.UIInfo.btn_audio[4])
+        break;
+      case "Numpad6":
+      case "Digit6":
+        this.onCustomButton(this.UIInfo.btn_audio[5])
+        break;
+      case "ArrowDown":
+        this.onArrivalButton()
+        break
+      case "ArrowRight":
+        this.onDepartureButton()
+        break
+      case "Numpad0":
+      case "Digit0":
+        this.stopOrReplayAudioPlay()
+        break
+      default:
+        break;
+    }
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -99,12 +141,13 @@ export class MainPage extends Component {
     this.onArrivalButton = this.onArrivalButton.bind(this)
     this.onDepartureButton = this.onDepartureButton.bind(this)
     this.onCustomButton = this.onCustomButton.bind(this)
-    this.stopAudioPlay = this.stopAudioPlay.bind(this)
+    this.stopAudioPlay = this.stopOrReplayAudioPlay.bind(this)
     this.UIInfo.lineID = this.props.lineID
     this.UIInfo.driver_ID = this.props.driverID
   }
 
   componentDidMount() {
+    window.addEventListener('keydown', this.handleKey)
     this.UIInfo.infoBox_text = "加 載 中 。\nLOADING .."
     this.setState({})
     if(this.state.isAutoMode && !this.state.isSupportGeolocaiton) {
@@ -201,7 +244,9 @@ export class MainPage extends Component {
       this.lineInfoContainer.setIndex(curStopIndex)
       this.playAudio(this.lineInfoContainer.getDeparturePlaylist())
       this.inStopPlayNum = this.state.audioPlayNum
-    } else if(curStopIndex === -1 && this.lastStopIndex !== curStopIndex && (this.inStopPlayNum !== this.state.audioPlayNum  || !isStillPlaying)) {
+    } else if (curStopIndex === -1 &&
+      this.lastStopIndex !== curStopIndex &&
+      (this.inStopPlayNum !== this.state.audioPlayNum || !isStillPlaying)) {
       // resume that stopIndex never change
       this.playAudio(this.lineInfoContainer.getArrivalPlaylist())
       this.lastStopIndex = -1
@@ -255,17 +300,26 @@ export class MainPage extends Component {
     return this.UIInfo.direc_info[direc] ?? "区间短线"
   }
 
-  stopAudioPlay() {
-    this.setState({
-      shouldPlay: false,
-      audioPlayNum: this.state.audioPlayNum + 1
-    })
+  stopOrReplayAudioPlay() {
+    const isStillPlaying = this.busPlayRef.current.isPlaying
+    if(isStillPlaying)
+    {
+      this.setState({
+        shouldPlay: false,
+        audioPlayNum: this.state.audioPlayNum + 1
+      })
+    } else {
+      this.setState({
+        shouldPlay: true,
+        audioPlayNum: this.state.audioPlayNum + 1
+      })
+    }
   }
 
   render()
   {
     return (
-        <header className="App-header">
+        < header className = "App-header">
         <BusPlayer 
         audioSrc={this.state.audioSrc}
         shouldPlay={this.state.shouldPlay}
@@ -405,7 +459,7 @@ export class MainPage extends Component {
               <DepartureButton disabled={this.state.isAutoMode} onClick={this.onDepartureButton}>
                 <KeyboardTab />入 站
               </DepartureButton>
-              <StopButton onClick={this.stopAudioPlay}>
+              <StopButton onClick={this.stopOrReplayAudioPlay}>
                 <Pause /> 停 止
               </StopButton>
               <LineButton onClick={() => {window.location.reload()}}>
