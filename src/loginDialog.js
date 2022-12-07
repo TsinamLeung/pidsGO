@@ -15,7 +15,8 @@ export class LoginDialog extends React.Component {
       driverID: "",
       lineID: "",
       pageRoute: "",
-      configCode: ''
+      configCode: '',
+      disableAuto: true,
     }
     this.onManualClose = this.onManualClose.bind(this)
     this.onAutoModeClose = this.onAutoModeClose.bind(this)
@@ -69,12 +70,17 @@ export class LoginDialog extends React.Component {
           <Button variant="outlined" href="#" onClick={this.onManualClose}>
             手动模式
           </Button>
-          <Button variant="outlined" href="#" onClick={this.onAutoModeClose}>
+          <Button variant="outlined" href="#" disabled={this.state.disableAuto} onClick={this.onAutoModeClose}>
             自动模式
           </Button>
         </ButtonGroup>
         <Stack spacing={1} flexGrow={0.01}></Stack>
-        <TextField label="配置代码" variant="outlined" value={this.state.configCode}  onChange={(event) => {this.setState({configCode: event.target.value})}} />
+        <TextField label="配置代码" variant="outlined" value={this.state.configCode}  onChange={(event) => {
+          
+          this.setState({
+            configCode: event.target.value,
+            disableAuto: event.target.value.length === 0})
+          }} />
         <Button variant="outlined" href="#" onClick={this.onGoToAutoModeRecorder}>
             采集工具
         </Button>

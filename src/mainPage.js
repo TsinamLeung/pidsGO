@@ -1,7 +1,6 @@
 import './App.css';
 import { ButtonBox, SimpleDivider, IconInfoBox, InfoFramework, ArrivalButton, DepartureButton, StopButton, LineButton } from './uiComponent';
 import Grid from '@mui/material/Grid';
-import SvgIcon from '@mui/material/SvgIcon';
 import { Divider, Stack} from '@mui/material';
 import { Component, createRef } from 'react';
 import { BusPlayer } from './audioController';
@@ -10,14 +9,21 @@ import UIInformation from './uiInfo';
 import { ConfigParser } from './ConfigParser.ts';
 import { LineInfoContainer, PlayDirection } from './LineInfoContainer.ts';
 import { padding } from '@mui/system';
-import {SatelliteAlt, SignalCellularAlt, Bluetooth, MoveToInbox} from '@mui/icons-material'
-const HomeIcon = function (props) {
-  return (
-    <SvgIcon {...props}>
+import {
+  SatelliteAlt,
+  SignalCellularAlt,
+  Bluetooth,
+  MoveToInbox,
+  RecentActors,
+  CurrencyYen,
+  AccessTime,
+  StackedLineChart,
+  Start,
+  KeyboardTab,
+  Pause,
+  Refresh
+} from '@mui/icons-material'
 
-    </SvgIcon>
-  );
-}
 const BottomButton = function (props) {
   return (
     <Grid item xs={props.xs} flexGrow={2}>
@@ -102,7 +108,7 @@ export class MainPage extends Component {
     this.UIInfo.infoBox_text = "加 載 中 。\nLOADING .."
     this.setState({})
     if(this.state.isAutoMode && !this.state.isSupportGeolocaiton) {
-      this.UIInfo.infoBox_text = "設 備 不 支 持 自 動 模 式。\nGeolocation are not support on your devices."
+      this.UIInfo.infoBox_text = "自 動 模 式 啟 動 失 敗 請 重 試。\nGeolocation are not support on your devices, please retry."
       this.setState({})
     }
     this.configParser.parseLineConfig(this.UIInfo.lineID).then(ret => {
@@ -110,6 +116,12 @@ export class MainPage extends Component {
       this.UIInfo.infoBox_text = "成 功 加 載，\nLoad Successed\n" + this.UIInfo.lineID
       this.updateUIInfo()
       this.setState({}) 
+      if(this.state.isAutoMode)
+      {
+        this.watchPositionID = navigator.geolocation.watchPosition(this.onGetlocationUpdate, null, {
+          timeout: 3000
+        })
+      }
     }, reason => {
       console.error(reason)
       this.UIInfo.infoBox_text = "失 敗 加 載，\nLoad Failed\n" + this.UIInfo.lineID
@@ -130,12 +142,6 @@ export class MainPage extends Component {
       }
       this.setState({}) 
     })
-    if(this.state.isAutoMode)
-    {
-      this.watchPositionID = navigator.geolocation.watchPosition(this.onGetlocationUpdate, null, {
-        timeout: 3000
-      })
-    }
   }
 
 
@@ -174,9 +180,15 @@ export class MainPage extends Component {
     }
     let coords = pos.coords
     let speed = coords.speed * 3.6
-    let inCircleStops = this.autoConfigContainer.positionContainer.map(v => 
-        inCircle(v.latitude, v.longtitude, this.autoConfigContainer.radius, 
-                 coords.latitude, coords.longitude, coords.accuracy))
+    let inCircleStops = this.autoConfigContainer.positionContainer.map(v => {
+      if (v === undefined || v === null )
+      {
+        return v
+      }
+      return inCircle(v.latitude, v.longtitude, this.autoConfigContainer.radius, 
+        coords.latitude, coords.longitude, coords.accuracy)
+      })
+
     const curStopIndex = inCircleStops.findIndex(v => v === true)
     if(this.busPlayRef.current === null)
     {
@@ -277,9 +289,9 @@ export class MainPage extends Component {
             padding={0}
             >
             <SatelliteAlt />
-            <Stack flexGrow={0.02} />
             <SignalCellularAlt />
             <Clock date={new Date()} />
+            <span style={{marginRight:'0.8em'}}> </span>
             <Bluetooth />
             <MoveToInbox />
             <Stack flexGrow={1} />
@@ -323,9 +335,9 @@ export class MainPage extends Component {
                   padding={2}
                   alignItems='start'
                   >
-                  <IconInfoBox title="司机工号：" content={this.UIInfo.driver_ID} contentColor="cyan"/>
-                  <IconInfoBox title="设备编号：" content={this.UIInfo.device_ID} contentColor="cyan"/>
-                  <IconInfoBox title="当前票价：" content={"￥" + this.UIInfo.cur_price} contentColor="cyan"/>
+                  <IconInfoBox icon={<RecentActors />} title="司机工号：" content={this.UIInfo.driver_ID} contentColor="cyan"/>
+                  <IconInfoBox icon={<RecentActors />} title="设备编号：" content={this.UIInfo.device_ID} contentColor="cyan"/>
+                  <IconInfoBox icon={<CurrencyYen />} title="当前票价：" content={"￥" + this.UIInfo.cur_price} contentColor="cyan"/>
                 </Stack>
                 {/* right */}
                 <InfoFramework
@@ -372,10 +384,10 @@ export class MainPage extends Component {
                 column={2}
                 >
                 <Grid item flexGrow={1} textAlign='start'>
-                <IconInfoBox  title="限速：" content={this.UIInfo.speed_limit} contentColor="cyan"/>
+                <IconInfoBox icon={<AccessTime />} title="限速：" content={this.UIInfo.speed_limit} contentColor="cyan"/>
                 </Grid>
                 <Grid item flexGrow={1} textAlign='start'>
-                <IconInfoBox title="速度：" content={this.UIInfo.speed} contentColor="cyan"/>
+                <IconInfoBox icon={<StackedLineChart />} title="速度：" content={this.UIInfo.speed} contentColor="cyan"/>
                 </Grid>
               </Grid>
             </Stack>
@@ -388,16 +400,16 @@ export class MainPage extends Component {
               spacing={1}
               >
               <ArrivalButton disabled={this.state.isAutoMode} onClick={this.onArrivalButton}>
-                出 站
+                <Start />出 站
               </ArrivalButton>
               <DepartureButton disabled={this.state.isAutoMode} onClick={this.onDepartureButton}>
-                入 站
+                <KeyboardTab />入 站
               </DepartureButton>
               <StopButton onClick={this.stopAudioPlay}>
-                停 止
+                <Pause /> 停 止
               </StopButton>
               <LineButton onClick={() => {window.location.reload()}}>
-                路 线
+                <Refresh />路 线
               </LineButton>
             </Stack>
           </Stack>
