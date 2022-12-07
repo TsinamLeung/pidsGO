@@ -199,11 +199,11 @@ export class MainPage extends Component {
     if(curStopIndex !== -1 && curStopIndex !== this.lastStopIndex) {
       this.lastStopIndex = curStopIndex
       this.lineInfoContainer.setIndex(curStopIndex)
-      this.playAudio(this.lineInfoContainer.getArrivalPlaylist())
+      this.playAudio(this.lineInfoContainer.getDeparturePlaylist())
       this.inStopPlayNum = this.state.audioPlayNum
     } else if(curStopIndex === -1 && this.lastStopIndex !== curStopIndex && (this.inStopPlayNum !== this.state.audioPlayNum  || !isStillPlaying)) {
       // resume that stopIndex never change
-      this.playAudio(this.lineInfoContainer.getDeparturePlaylist())
+      this.playAudio(this.lineInfoContainer.getArrivalPlaylist())
       this.lastStopIndex = -1
     }
 
